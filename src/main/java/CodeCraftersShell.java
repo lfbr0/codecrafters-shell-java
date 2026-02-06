@@ -46,7 +46,7 @@ public class CodeCraftersShell implements AutoCloseable {
 
         // find & execute command or say it's unknown
         shellEnvironment
-                .getCommand(command)
+                .getBuiltinCommand(command)
                 .ifPresentOrElse(
                         cmd -> cmd.execute(outputStream, errorStream, args),
                         () -> new PrintStream(outputStream).println(command + ": command not found")

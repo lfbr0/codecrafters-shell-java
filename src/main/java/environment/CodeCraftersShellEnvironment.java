@@ -2,7 +2,6 @@ package environment;
 
 import command.CodeCraftersShellCommand;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,15 +22,15 @@ public class CodeCraftersShellEnvironment {
         return SINGLETON_INSTANCE;
     }
 
-    public void registerCommand(String commandName, CodeCraftersShellCommand command) {
+    public void registerBuiltinCommand(String commandName, CodeCraftersShellCommand command) {
         registeredCommands.put(commandName, command);
     }
 
-    public Optional<CodeCraftersShellCommand> getCommand(String commandName) {
+    public Optional<CodeCraftersShellCommand> getBuiltinCommand(String commandName) {
         return Optional.ofNullable(registeredCommands.get(commandName));
     }
 
-    public boolean hasCommand(String arg) {
+    public boolean hasBuiltinCommand(String arg) {
         return registeredCommands.containsKey(arg);
     }
 }
