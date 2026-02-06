@@ -23,12 +23,18 @@ public class CodeCraftersShell implements AutoCloseable {
             // while should not close
             while (!shouldClose) {
                 System.out.print("$ ");
-                interpret(scanner.nextLine());
+                interpret(scanner.nextLine().trim());
             }
         }
     }
 
     private void interpret(String line) {
+        // if exit condition, then exit shell
+        if (line.equals("exit")) {
+            shouldClose = true;
+            return;
+        }
+
         new PrintStream(outputStream).println(line + ": command not found");
     }
 
