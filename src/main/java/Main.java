@@ -1,4 +1,5 @@
 import command.EchoCommand;
+import command.PwdCommand;
 import command.TypeCommand;
 import environment.CodeCraftersShellEnvironment;
 
@@ -11,6 +12,7 @@ public class Main {
         codeCraftersShellEnvironment.registerBuiltinCommand("exit", (_, _, _)  ->  {});
         codeCraftersShellEnvironment.registerBuiltinCommand("echo", new EchoCommand());
         codeCraftersShellEnvironment.registerBuiltinCommand("type", new TypeCommand());
+        codeCraftersShellEnvironment.registerBuiltinCommand("pwd", new PwdCommand());
 
         try (CodeCraftersShell shell = new CodeCraftersShell(getEnvironment())) {
             shell.repl();

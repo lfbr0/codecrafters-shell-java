@@ -2,17 +2,10 @@ package command;
 
 import environment.CodeCraftersShellEnvironment;
 
-import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Optional;
 
 import static environment.CodeCraftersShellEnvironment.getEnvironment;
-import static java.nio.file.Files.isExecutable;
-import static java.util.Arrays.stream;
 
 public class TypeCommand implements CodeCraftersShellCommand {
     @Override
