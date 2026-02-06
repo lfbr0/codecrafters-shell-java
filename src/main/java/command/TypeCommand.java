@@ -21,6 +21,7 @@ public class TypeCommand implements CodeCraftersShellCommand {
         for (String arg : args) {
             if (getEnvironment().hasBuiltinCommand(arg)) {
                 printStream.println(arg + " is a shell builtin");
+                return;
             }
 
             // check if command is in path, otherwise it doesn't exist
