@@ -13,7 +13,7 @@ public class TypeCommand implements CodeCraftersShellCommand {
 
         for (String arg : args) {
             if (getEnvironment().hasCommand(arg)) {
-                printStream.println("arg is a shell builtin");
+                printStream.println(arg + " is a shell builtin");
             } else {
                 printStreamError.println(arg + ": not found");
             }
