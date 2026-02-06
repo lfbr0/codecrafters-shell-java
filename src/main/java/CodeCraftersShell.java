@@ -1,17 +1,23 @@
+import environment.CodeCraftersShellEnvironment;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CodeCraftersShell implements AutoCloseable {
 
+    private final CodeCraftersShellEnvironment shellEnvironment;
     private InputStream inputStream = System.in;
     private OutputStream outputStream = System.out;
     private OutputStream errorStream  = System.err;
 
     // shell state vars
-    private boolean shouldClose;
+    private boolean shouldClose = false;
+
+    public CodeCraftersShell(CodeCraftersShellEnvironment shellEnvironment) {
+        this.shellEnvironment = shellEnvironment;
+    }
 
     @Override
     public void close() throws Exception {
@@ -29,13 +35,22 @@ public class CodeCraftersShell implements AutoCloseable {
     }
 
     private void interpret(String line) {
+        String command = line.split(" ")[0].trim();
+        String args = line.substring(command.length()).trim();
+
         // if exit condition, then exit shell
-        if (line.equals("exit")) {
+        if (command.equals("exit")) {
             shouldClose = true;
             return;
         }
 
-        new PrintStream(outputStream).println(line + ": command not found");
+        // find & execute command or say it's unknown
+        shellEnvironment
+                .getCommand(command)
+                .ifPresentOrElse(
+                        cmd -> cmd.execute(outputStream, errorStream, args),
+                        () -> new PrintStream(outputStream).println(command + ": command not found")
+                );
     }
 
 }
