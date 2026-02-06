@@ -9,6 +9,7 @@ public class Main {
 
         // initialize classes in command package
         CodeCraftersShellEnvironment codeCraftersShellEnvironment = getEnvironment();
+        codeCraftersShellEnvironment.registerCommand("exit", (_, _, _)  ->  {});
         codeCraftersShellEnvironment.registerCommand("echo", new EchoCommand());
         codeCraftersShellEnvironment.registerCommand("type", new TypeCommand());
 
