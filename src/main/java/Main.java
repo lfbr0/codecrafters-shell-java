@@ -2,6 +2,11 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        System.out.print("$ ");
+
+        try (CodeCraftersShell shell = new CodeCraftersShell()) {
+            System.out.print("$ ");
+            shell.fetchNextLineAndInterpret();
+        }
+
     }
 }
