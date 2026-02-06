@@ -42,7 +42,7 @@ public class CodeCraftersShellEnvironment {
      * @param command command/executable to find
      * @return executable full path
      */
-    public static Optional<String> commandPath(String command) {
+    public static Optional<Path> commandPath(String command) {
         String pathVariable = System.getenv("PATH");
         String[] pathsInPathVariable = pathVariable.split(File.pathSeparator);
 
@@ -60,7 +60,7 @@ public class CodeCraftersShellEnvironment {
                 if (!isExecutable(filePath))
                     continue;
 
-                return Optional.of(file.getAbsolutePath());
+                return Optional.of(filePath);
             }
         }
 
@@ -77,7 +77,7 @@ public class CodeCraftersShellEnvironment {
            return (os, es, args) -> {
                 // form args
                 List<String> argsList = new ArrayList<>(args.length + 1);
-                argsList.add(cmdPath);
+                argsList.add(cmdPath.getFileName().toString());
                 argsList.addAll(Arrays.asList(args));
 
                 ProcessBuilder processBuilder = new ProcessBuilder(argsList);
