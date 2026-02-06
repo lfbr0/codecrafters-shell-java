@@ -38,7 +38,7 @@ public class CodeCraftersShell implements AutoCloseable {
 
     private void interpret(String line) {
         String command = line.split(" ")[0].trim();
-        String args = line.substring(command.length()).trim();
+        String[] args = line.substring(command.length()).trim().split(" ");
 
         // if exit condition, then exit shell
         if (command.equals("exit")) {
