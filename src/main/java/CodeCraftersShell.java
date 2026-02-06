@@ -1,8 +1,10 @@
+import command.CodeCraftersShellCommand;
 import environment.CodeCraftersShellEnvironment;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class CodeCraftersShell implements AutoCloseable {
@@ -44,13 +46,32 @@ public class CodeCraftersShell implements AutoCloseable {
             return;
         }
 
-        // find & execute command or say it's unknown
-        shellEnvironment
-                .getBuiltinCommand(command)
-                .ifPresentOrElse(
-                        cmd -> cmd.execute(outputStream, errorStream, args),
-                        () -> new PrintStream(outputStream).println(command + ": command not found")
-                );
+        try {
+            // if builtin command, then execute it (get from shell env)
+            if (shellEnvironment.hasBuiltinCommand(command)) {
+                shellEnvironment
+                        .getBuiltinCommand(command)
+                        .get()
+                        .execute(outputStream, errorStream, args);
+                return;
+            }
+
+            // try to execute command from path var
+            if (shellEnvironment.hasCommand(command)) {
+                shellEnvironment
+                        .getCommand(command)
+                        .get()
+                        .execute(outputStream, errorStream, args);
+                return;
+            }
+
+            // no command has been found!
+            new PrintStream(outputStream).println(command + ": command not found");
+        } catch (Exception e) {
+            // print stack trace and exit
+            e.printStackTrace(new PrintStream(errorStream));
+            shouldClose = true;
+        }
     }
 
 }
