@@ -5,6 +5,7 @@ import command.CodeCraftersShellCommand;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CodeCraftersShellEnvironment {
 
@@ -12,19 +13,7 @@ public class CodeCraftersShellEnvironment {
     private final Map<String, CodeCraftersShellCommand> registeredCommands;
 
     private CodeCraftersShellEnvironment() {
-        this.registeredCommands = new HashMap<>();
-    }
-
-    public void registerCommand(String commandName, CodeCraftersShellCommand command) {
-        synchronized (registeredCommands) {
-            registeredCommands.put(commandName, command);
-        }
-    }
-
-    public Optional<CodeCraftersShellCommand> getCommand(String commandName) {
-        synchronized (registeredCommands) {
-            return Optional.ofNullable(registeredCommands.get(commandName));
-        }
+        this.registeredCommands = new ConcurrentHashMap<>();
     }
 
     public static synchronized CodeCraftersShellEnvironment getEnvironment() {
@@ -34,4 +23,15 @@ public class CodeCraftersShellEnvironment {
         return SINGLETON_INSTANCE;
     }
 
+    public void registerCommand(String commandName, CodeCraftersShellCommand command) {
+        registeredCommands.put(commandName, command);
+    }
+
+    public Optional<CodeCraftersShellCommand> getCommand(String commandName) {
+        return Optional.ofNullable(registeredCommands.get(commandName));
+    }
+
+    public boolean hasCommand(String arg) {
+        return registeredCommands.containsKey(arg);
+    }
 }
