@@ -25,6 +25,7 @@ public class CodeCraftersShellEnvironment {
         this.currDirFile = new File(".").toPath().toFile();
         this.history = new LinkedList<>();
         this.historyAppendIndex = 0;
+        refreshCommandsInPath();
     }
 
     public static synchronized CodeCraftersShellEnvironment getEnvironment() {
@@ -169,7 +170,6 @@ public class CodeCraftersShellEnvironment {
      * @return list of commands
      */
     public List<String> getPathCommands() {
-        refreshCommandsInPath();
         return new ArrayList<>(COMMANDS_IN_PATH.keySet());
     }
 

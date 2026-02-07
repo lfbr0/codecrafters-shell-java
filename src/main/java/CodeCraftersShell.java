@@ -3,6 +3,7 @@ import environment.CodeCraftersShellEnvironment;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.reader.impl.DefaultParser;
+import org.jline.reader.impl.LineReaderImpl;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
@@ -49,6 +50,10 @@ public class CodeCraftersShell implements AutoCloseable {
                     .terminal(terminal)
                     .parser(parser)
                     .completer(shellCompleter)
+                    .option(LineReader.Option.INSERT_TAB, true)
+                    .option(LineReader.Option.AUTO_LIST, true)
+                    .option(LineReader.Option.AUTO_MENU, false)
+                    .option(LineReader.Option.MENU_COMPLETE, false)
                     .build();
 
             // add history to reader
