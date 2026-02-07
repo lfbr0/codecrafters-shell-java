@@ -51,7 +51,7 @@ public class CodeCraftersShell implements AutoCloseable {
                     .parser(parser)
                     .completer(shellCompleter)
                     .option(LineReader.Option.INSERT_TAB, true)
-                    .option(LineReader.Option.AUTO_LIST, true)
+                    .option(LineReader.Option.AUTO_LIST, false)
                     .option(LineReader.Option.AUTO_MENU, false)
                     .option(LineReader.Option.MENU_COMPLETE, false)
                     .build();
