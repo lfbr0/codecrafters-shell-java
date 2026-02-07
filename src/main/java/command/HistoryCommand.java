@@ -35,7 +35,6 @@ public class HistoryCommand implements CodeCraftersShellCommand {
 
         // -w flag implies writing from history to file path in args[1] & not doing anything else
         if (args != null && args.length >= 2 && args[0].equals("-w")) {
-            history.add(""); // empty line as per specs
             Files.write(Path.of(args[1]), history);
             return;
         }
