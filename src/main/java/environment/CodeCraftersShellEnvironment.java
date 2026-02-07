@@ -13,13 +13,15 @@ import static java.nio.file.Files.isExecutable;
 public class CodeCraftersShellEnvironment {
 
     private static CodeCraftersShellEnvironment SINGLETON_INSTANCE;
+    private static final Map<String, Path> COMMANDS_IN_PATH = new HashMap<>();
+
     private final Map<String, CodeCraftersShellCommand> registeredCommands;
+    private final List<String> history;
     private File currDirFile;
-    private List<String> history;
     private int historyAppendIndex;
 
     private CodeCraftersShellEnvironment() {
-        this.registeredCommands = new ConcurrentHashMap<>();
+        this.registeredCommands = new HashMap<>();
         this.currDirFile = new File(".").toPath().toFile();
         this.history = new LinkedList<>();
         this.historyAppendIndex = 0;
@@ -98,6 +100,19 @@ public class CodeCraftersShellEnvironment {
      * @return executable full path
      */
     public static Optional<Path> commandPath(String command) {
+        if (COMMANDS_IN_PATH.containsKey(command)) {
+            return Optional.of(COMMANDS_IN_PATH.get(command));
+        }
+        // it does not exist, so let's refresh cache and see if we can get it now...
+        refreshCommandsInPath();
+        return Optional.ofNullable(COMMANDS_IN_PATH.get(command));
+    }
+
+    /**
+     * Refreshes cache of commands in $PATH
+     * @implNote This method is called on first use of commandPath()
+     */
+    private static void refreshCommandsInPath() {
         String pathVariable = System.getenv("PATH");
         String[] pathsInPathVariable = pathVariable.split(File.pathSeparator);
 
@@ -108,19 +123,14 @@ public class CodeCraftersShellEnvironment {
                 continue;
 
             for (File file : filesInPath) {
-                if (!file.getName().equals(command))
-                    continue;
-
                 Path filePath = file.toPath();
                 if (!isExecutable(filePath))
                     continue;
 
-                return Optional.of(filePath);
+                // add to COMMANDS_PATH map if not existing for caching
+                COMMANDS_IN_PATH.putIfAbsent(file.getName(), filePath);
             }
         }
-
-        // no match found
-        return Optional.empty();
     }
 
     /**
@@ -155,11 +165,11 @@ public class CodeCraftersShellEnvironment {
     }
 
     /**
-     * Get user home directory
-     * @return user home directory
+     * Get all commands registered in $PATH
+     * @return list of commands
      */
-    public String getUserHomeDir() {
-        return System.getenv("HOME");
+    public List<String> getPathCommands() {
+        return new ArrayList<>(COMMANDS_IN_PATH.keySet());
     }
 
     /**

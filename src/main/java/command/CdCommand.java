@@ -25,7 +25,7 @@ public class CdCommand implements CodeCraftersShellCommand {
         String dir = args[0];
 
         // replace all ~ symbol with home path
-        dir = dir.replaceAll("~", shellEnvironment.getUserHomeDir());
+        dir = dir.replaceAll("~", System.getenv("HOME"));
 
         // if not absolute path, then apply seperators & normalize it
         if (!dir.startsWith(File.separator)) {

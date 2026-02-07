@@ -19,7 +19,9 @@ public class CodeCraftersShellCompleter implements Completer {
 
     public CodeCraftersShellCompleter(CodeCraftersShellEnvironment env) {
         this.env = env;
-        this.stringsCompleter = new StringsCompleter(env.getBuiltinCommands());
+        List<String> allCommands = env.getBuiltinCommands();
+        allCommands.addAll(env.getPathCommands());
+        this.stringsCompleter = new StringsCompleter(allCommands);
     }
 
     @Override
