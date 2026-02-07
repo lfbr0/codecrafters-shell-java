@@ -19,7 +19,11 @@ public class HistoryCommand implements CodeCraftersShellCommand {
 
         // if history file var, then read it
         shellEnvironment.getHistoryFilePath().ifPresent(historyFile -> {
-            readHistoryFromFile(historyFile);
+            try {
+                readHistoryFromFile(historyFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         });
     }
 
