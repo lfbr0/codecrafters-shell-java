@@ -1,7 +1,4 @@
-import command.CdCommand;
-import command.EchoCommand;
-import command.PwdCommand;
-import command.TypeCommand;
+import command.*;
 import environment.CodeCraftersShellEnvironment;
 
 import static environment.CodeCraftersShellEnvironment.getEnvironment;
@@ -15,6 +12,7 @@ public class Main {
         shellEnvironment.registerBuiltinCommand("type", new TypeCommand(shellEnvironment));
         shellEnvironment.registerBuiltinCommand("pwd", new PwdCommand(shellEnvironment));
         shellEnvironment.registerBuiltinCommand("cd", new CdCommand(shellEnvironment));
+        shellEnvironment.registerBuiltinCommand("history", new HistoryCommand(shellEnvironment));
 
         try (CodeCraftersShell shell = new CodeCraftersShell(getEnvironment())) {
             shell.repl();

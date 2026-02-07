@@ -15,10 +15,12 @@ public class CodeCraftersShellEnvironment {
     private static CodeCraftersShellEnvironment SINGLETON_INSTANCE;
     private final Map<String, CodeCraftersShellCommand> registeredCommands;
     private File currDirFile;
+    private List<String> history;
 
     private CodeCraftersShellEnvironment() {
         this.registeredCommands = new ConcurrentHashMap<>();
         this.currDirFile = new File(".").toPath().toFile();
+        this.history = new LinkedList<>();
     }
 
     public static synchronized CodeCraftersShellEnvironment getEnvironment() {
@@ -148,5 +150,13 @@ public class CodeCraftersShellEnvironment {
      */
     public String getUserHomeDir() {
         return System.getenv("HOME");
+    }
+
+    public List<String> getHistory() {
+        return new ArrayList<>(history);
+    }
+
+    public void addToHistory(String command) {
+        history.add(command);
     }
 }
