@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 
 public class HistoryCommand implements CodeCraftersShellCommand {
@@ -33,9 +34,10 @@ public class HistoryCommand implements CodeCraftersShellCommand {
             return;
         }
 
-        // -w flag implies writing from history to file path in args[1] & not doing anything else
-        if (args != null && args.length >= 2 && args[0].equals("-w")) {
-            Files.write(Path.of(args[1]), history);
+        // -w (-a does same but append) flag implies writing from history to file path in args[1] & not doing anything else
+        if (args != null && args.length >= 2 && (args[0].equals("-w") || args[0].equals("-a"))) {
+            StandardOpenOption mode = args[0].equals("-a") ? StandardOpenOption.APPEND : StandardOpenOption.WRITE;
+            Files.write(Path.of(args[1]), history, mode);
             return;
         }
 
