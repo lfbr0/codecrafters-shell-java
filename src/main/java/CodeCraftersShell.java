@@ -1,6 +1,12 @@
 import command.CodeCraftersShellCommand;
 import environment.CodeCraftersShellEnvironment;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.reader.impl.DefaultParser;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -29,20 +35,41 @@ public class CodeCraftersShell implements AutoCloseable {
     }
 
     // perform REPL cycle in shell
-    public void repl() {
-        try (Scanner scanner = new Scanner(inputStream)) {
-            // while should not close
+    public void repl() throws IOException {
+        DefaultParser parser = new DefaultParser();
+        parser.setEscapeChars(new char[0]);
+
+        try (Terminal terminal = TerminalBuilder.builder()
+                .streams(inputStream, outputStream)
+                .system(true)
+                .build()
+        ) {
+            LineReader reader = LineReaderBuilder.builder()
+                    .terminal(terminal)
+                    .parser(parser)
+                    .build();
+
+            // add history to reader
+            shellEnvironment.getHistory().forEach(cmd -> reader.getHistory().add(cmd));
+
             while (!shouldClose) {
-                new PrintStream(outputStream).print("$ ");
-                interpret(scanner.nextLine().trim());
+                String line = reader.readLine("$ ");
+                if (line == null) {
+                    continue;
+                }
+
+                line = line.trim();
+                if (!line.isEmpty()) {
+                    shellEnvironment.addToHistory(line);
+                }
+
+                interpret(line);
+                terminal.flush();
             }
         }
     }
 
     private void interpret(String line) {
-        // Add this line to history
-        shellEnvironment.addToHistory(line);
-
         // get command and args
         String command = line.split(" ")[0].trim();
         String[] args = line.substring(command.length()).trim().split(" ");
