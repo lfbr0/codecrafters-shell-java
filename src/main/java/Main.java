@@ -1,4 +1,5 @@
 import command.*;
+import completion.CodeCraftersShellCompleter;
 import environment.CodeCraftersShellEnvironment;
 
 import java.nio.file.Files;
@@ -29,7 +30,8 @@ public class Main {
         }
         shellEnvironment.registerBuiltinCommand("history", historyCommand);
 
-        try (CodeCraftersShell shell = new CodeCraftersShell(getEnvironment())) {
+        CodeCraftersShellEnvironment env = getEnvironment();
+        try (CodeCraftersShell shell = new CodeCraftersShell(env, new CodeCraftersShellCompleter(env))) {
             shell.repl();
         }
 

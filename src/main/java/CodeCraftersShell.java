@@ -1,3 +1,4 @@
+import completion.CodeCraftersShellCompleter;
 import environment.CodeCraftersShellEnvironment;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -13,6 +14,7 @@ import java.io.PrintStream;
 public class CodeCraftersShell implements AutoCloseable {
 
     private final CodeCraftersShellEnvironment shellEnvironment;
+    private final CodeCraftersShellCompleter shellCompleter;
     private InputStream inputStream = System.in;
     private OutputStream outputStream = System.out;
     private OutputStream errorStream  = System.err;
@@ -20,8 +22,10 @@ public class CodeCraftersShell implements AutoCloseable {
     // shell state vars
     private boolean shouldClose = false;
 
-    public CodeCraftersShell(CodeCraftersShellEnvironment shellEnvironment) {
+    public CodeCraftersShell(CodeCraftersShellEnvironment shellEnvironment,
+                             CodeCraftersShellCompleter shellCompleter) {
         this.shellEnvironment = shellEnvironment;
+        this.shellCompleter = shellCompleter;
     }
 
     @Override
@@ -44,6 +48,7 @@ public class CodeCraftersShell implements AutoCloseable {
             LineReader reader = LineReaderBuilder.builder()
                     .terminal(terminal)
                     .parser(parser)
+                    .completer(shellCompleter)
                     .build();
 
             // add history to reader

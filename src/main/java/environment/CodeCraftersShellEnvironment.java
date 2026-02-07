@@ -85,6 +85,14 @@ public class CodeCraftersShellEnvironment {
     }
 
     /**
+     * Get all builtin commands registered in shell
+     * @return list of builtin commands
+     */
+    public List<String> getBuiltinCommands() {
+        return new ArrayList<>(registeredCommands.keySet());
+    }
+
+    /**
      * Try to find command in any of the directories of $PATH and return it
      * @param command command/executable to find
      * @return executable full path
