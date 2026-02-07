@@ -13,9 +13,11 @@ public class CodeCraftersShellEnvironment {
 
     private static CodeCraftersShellEnvironment SINGLETON_INSTANCE;
     private final Map<String, CodeCraftersShellCommand> registeredCommands;
+    private File currDirFile;
 
     private CodeCraftersShellEnvironment() {
         this.registeredCommands = new ConcurrentHashMap<>();
+        this.currDirFile = new File(".").toPath().toFile();
     }
 
     public static synchronized CodeCraftersShellEnvironment getEnvironment() {
@@ -25,14 +27,46 @@ public class CodeCraftersShellEnvironment {
         return SINGLETON_INSTANCE;
     }
 
+
+    /**
+     * Set current working directory
+     * @param path path to set working directory
+     */
+    public void setCurrentDirectory(String path) {
+        this.currDirFile = new File(path).toPath().toFile();
+    }
+
+    /**
+     * Gets current working directory
+     * @return File of current directory
+     */
+    public File getCurrentDirectory() {
+        return new File(currDirFile.getAbsolutePath());
+    }
+
+    /**
+     * Register a built in command to this shell that is not searched on $PATH
+     * @param commandName command to register
+     * @param command command handler
+     */
     public void registerBuiltinCommand(String commandName, CodeCraftersShellCommand command) {
         registeredCommands.put(commandName, command);
     }
 
-    public boolean hasBuiltinCommand(String arg) {
-        return registeredCommands.containsKey(arg);
+    /**
+     * Checks if command is registered as built in
+     * @param command command to search
+     * @return true if builtin
+     */
+    public boolean hasBuiltinCommand(String command) {
+        return registeredCommands.containsKey(command);
     }
 
+    /**
+     * Get command handler for command
+     * @param commandName command to get from shell builtin
+     * @return optional command handler
+     */
     public Optional<CodeCraftersShellCommand> getBuiltinCommand(String commandName) {
         return Optional.ofNullable(registeredCommands.get(commandName));
     }
@@ -68,10 +102,20 @@ public class CodeCraftersShellEnvironment {
         return Optional.empty();
     }
 
+    /**
+     * Checks if command is registered in $PATH
+     * @param command command/executable to check
+     * @return true if command exists in path
+     */
     public boolean hasCommand(String command) {
         return commandPath(command).isPresent();
     }
 
+    /**
+     * Get command runner for command in shell
+     * @param command command to run
+     * @return command executor
+     */
     public Optional<CodeCraftersShellCommand> getCommand(String command) {
         return commandPath(command).map(cmdPath -> {
            return (os, es, args) -> {
@@ -80,7 +124,7 @@ public class CodeCraftersShellEnvironment {
                 argsList.add(cmdPath.getFileName().toString());
                 argsList.addAll(Arrays.asList(args));
 
-                ProcessBuilder processBuilder = new ProcessBuilder(argsList);
+                ProcessBuilder processBuilder = new ProcessBuilder(argsList).directory(currDirFile);
                 Process process = processBuilder.start();
                 process.getInputStream().transferTo(os);
                 process.getErrorStream().transferTo(es);
