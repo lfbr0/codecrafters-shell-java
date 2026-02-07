@@ -31,16 +31,31 @@ public class HistoryCommand implements CodeCraftersShellCommand {
                         line = line.trim();
                         if (!line.isBlank()) shellEnvironment.addToHistory(line);
                     });
+            shellEnvironment.setHistoryAppendIndex(shellEnvironment.getHistoryCopy().size());
             return;
         }
 
         // -w (-a does same but append) flag implies writing from history to file path in args[1] & not doing anything else
         if (args != null && args.length >= 2 && (args[0].equals("-w") || args[0].equals("-a"))) {
-            if (args[0].equals("-a")) {
-                Files.write(Path.of(args[1]), history, StandardOpenOption.APPEND);
-            } else { //it's write
-                Files.write(Path.of(args[1]), history);
+            int appendStart = Math.min(shellEnvironment.getHistoryAppendIndex(), history.size());
+
+            if (args[0].equals("-a")) { // append mode
+                List<String> toAppend = history.subList(appendStart, history.size());
+                Files.write(
+                        Path.of(args[1]),
+                        toAppend,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.APPEND
+                );
+            } else { // it's write mode
+                Files.write(
+                        Path.of(args[1]),
+                        history,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING
+                );
             }
+            shellEnvironment.setHistoryAppendIndex(history.size());
             return;
         }
 

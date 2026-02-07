@@ -16,11 +16,13 @@ public class CodeCraftersShellEnvironment {
     private final Map<String, CodeCraftersShellCommand> registeredCommands;
     private File currDirFile;
     private List<String> history;
+    private int historyAppendIndex;
 
     private CodeCraftersShellEnvironment() {
         this.registeredCommands = new ConcurrentHashMap<>();
         this.currDirFile = new File(".").toPath().toFile();
         this.history = new LinkedList<>();
+        this.historyAppendIndex = 0;
     }
 
     public static synchronized CodeCraftersShellEnvironment getEnvironment() {
@@ -166,5 +168,13 @@ public class CodeCraftersShellEnvironment {
      */
     public void addToHistory(String command) {
         history.add(command);
+    }
+
+    public int getHistoryAppendIndex() {
+        return historyAppendIndex;
+    }
+
+    public void setHistoryAppendIndex(int historyAppendIndex) {
+        this.historyAppendIndex = historyAppendIndex;
     }
 }
