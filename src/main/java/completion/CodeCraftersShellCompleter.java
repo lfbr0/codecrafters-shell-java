@@ -16,6 +16,8 @@ import java.util.List;
 public class CodeCraftersShellCompleter implements Completer {
 
     private final List<String> allCommands;
+    private String lastWord = null;
+    private boolean lastAmbiguous = false;
 
     public CodeCraftersShellCompleter(CodeCraftersShellEnvironment env) {
         this.allCommands = new AbstractList<>() {
@@ -38,6 +40,7 @@ public class CodeCraftersShellCompleter implements Completer {
     public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
         List<String> matchingCommands = allCommands.stream()
                 .filter(command -> command.startsWith(line.word()))
+                .distinct()
                 .sorted() // sort alphabetically
                 .toList();
 
@@ -50,12 +53,18 @@ public class CodeCraftersShellCompleter implements Completer {
         if (matchingCommands.isEmpty())
             return;
 
-        // if multiple matches, list them with fixed spacing and keep input unchanged
-        String list = String.join("  ", matchingCommands);
-        reader.getTerminal().writer().println("\n" + list);
-        reader.getTerminal().writer().flush();
-        ((LineReaderImpl) reader).redrawLine();
-        ((LineReaderImpl) reader).redisplay();
+        // if multiple matches, list them with fixed spacing and keep input unchanged, but only on consecutive TAB
+        if (matchingCommands.size() > 1) {
+            boolean sameWord = line.word().equals(lastWord);
+            if (sameWord && lastAmbiguous) {
+                String list = String.join("  ", matchingCommands);
+                reader.getTerminal().writer().println();
+                reader.getTerminal().writer().println(list);
+                reader.getTerminal().writer().flush();
+                ((LineReaderImpl) reader).redrawLine();
+                ((LineReaderImpl) reader).redisplay();
+            }
+        }
 
         // fill in candidates with a lazy list - this will allow TAB autocompletion
         candidates.addAll(new AbstractList<>() {
@@ -69,5 +78,7 @@ public class CodeCraftersShellCompleter implements Completer {
                 return matchingCommands.size();
             }
         });
+        lastWord = line.word();
+        lastAmbiguous = matchingCommands.size() > 1;
     }
 }
