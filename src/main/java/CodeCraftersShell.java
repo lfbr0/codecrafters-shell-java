@@ -37,6 +37,10 @@ public class CodeCraftersShell implements AutoCloseable {
     }
 
     private void interpret(String line) {
+        // Add this line to history
+        shellEnvironment.addToHistory(line);
+
+        // get command and args
         String command = line.split(" ")[0].trim();
         String[] args = line.substring(command.length()).trim().split(" ");
 

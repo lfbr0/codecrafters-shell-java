@@ -152,10 +152,18 @@ public class CodeCraftersShellEnvironment {
         return System.getenv("HOME");
     }
 
+    /**
+     * Retrieves command history (last is last executed)
+     * @return list of commands
+     */
     public List<String> getHistory() {
         return new ArrayList<>(history);
     }
 
+    /**
+     * Adds command to history
+     * @param command command to add
+     */
     public void addToHistory(String command) {
         history.add(command);
     }
