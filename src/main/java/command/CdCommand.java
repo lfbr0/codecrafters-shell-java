@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URI;
-import java.nio.file.Path;
 
 public class CdCommand implements CodeCraftersShellCommand {
 

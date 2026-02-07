@@ -4,12 +4,7 @@ import environment.CodeCraftersShellEnvironment;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class HistoryCommand implements CodeCraftersShellCommand {
 

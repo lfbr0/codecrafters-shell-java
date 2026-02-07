@@ -4,9 +4,6 @@ import environment.CodeCraftersShellEnvironment;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
-
-import static environment.CodeCraftersShellEnvironment.getEnvironment;
 
 public class EchoCommand implements CodeCraftersShellCommand {
 

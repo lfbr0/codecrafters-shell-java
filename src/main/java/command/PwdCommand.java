@@ -2,10 +2,8 @@ package command;
 
 import environment.CodeCraftersShellEnvironment;
 
-import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.URI;
 
 public class PwdCommand implements CodeCraftersShellCommand {
 

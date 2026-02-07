@@ -1,4 +1,3 @@
-import command.CodeCraftersShellCommand;
 import environment.CodeCraftersShellEnvironment;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
@@ -10,8 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.Optional;
-import java.util.Scanner;
 
 public class CodeCraftersShell implements AutoCloseable {
 
