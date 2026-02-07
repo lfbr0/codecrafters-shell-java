@@ -141,4 +141,12 @@ public class CodeCraftersShellEnvironment {
            };
         });
     }
+
+    /**
+     * Get user home directory
+     * @return user home directory
+     */
+    public String getUserHomeDir() {
+        return System.getenv("HOME");
+    }
 }
