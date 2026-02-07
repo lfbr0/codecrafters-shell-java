@@ -8,6 +8,13 @@ import java.io.PrintStream;
 import static environment.CodeCraftersShellEnvironment.getEnvironment;
 
 public class TypeCommand implements CodeCraftersShellCommand {
+
+    private final CodeCraftersShellEnvironment shellEnvironment;
+
+    public TypeCommand(CodeCraftersShellEnvironment shellEnvironment) {
+        this.shellEnvironment = shellEnvironment;
+    }
+
     @Override
     public void execute(OutputStream outputStream, OutputStream errorStream, String... args) {
         PrintStream printStream = new PrintStream(outputStream);

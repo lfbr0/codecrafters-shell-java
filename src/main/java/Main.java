@@ -11,8 +11,8 @@ public class Main {
         // initialize classes in command package
         CodeCraftersShellEnvironment shellEnvironment = getEnvironment();
         shellEnvironment.registerBuiltinCommand("exit", (_, _, _)  ->  {});
-        shellEnvironment.registerBuiltinCommand("echo", new EchoCommand());
-        shellEnvironment.registerBuiltinCommand("type", new TypeCommand());
+        shellEnvironment.registerBuiltinCommand("echo", new EchoCommand(shellEnvironment));
+        shellEnvironment.registerBuiltinCommand("type", new TypeCommand(shellEnvironment));
         shellEnvironment.registerBuiltinCommand("pwd", new PwdCommand(shellEnvironment));
         shellEnvironment.registerBuiltinCommand("cd", new CdCommand(shellEnvironment));
 

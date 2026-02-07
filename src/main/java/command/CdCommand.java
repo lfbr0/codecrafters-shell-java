@@ -5,6 +5,7 @@ import environment.CodeCraftersShellEnvironment;
 import java.io.File;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.URI;
 import java.nio.file.Path;
 
 public class CdCommand implements CodeCraftersShellCommand {
@@ -23,6 +24,13 @@ public class CdCommand implements CodeCraftersShellCommand {
         }
 
         String dir = args[0];
+        // if not absolute path, then apply seperators & normalize it
+        if (!dir.startsWith(File.separator)) {
+            dir = URI.create(shellEnvironment.getCurrentDirectory().getAbsolutePath() + File.separator + dir)
+                    .normalize()
+                    .toString();
+        }
+
         if (!new File(dir).exists())
             new PrintStream(errorStream).println("cd: " + dir + ": No such file or directory");
         else

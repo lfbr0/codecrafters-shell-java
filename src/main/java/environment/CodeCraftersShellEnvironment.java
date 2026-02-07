@@ -3,6 +3,7 @@ package environment;
 import command.CodeCraftersShellCommand;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,7 +42,15 @@ public class CodeCraftersShellEnvironment {
      * @return File of current directory
      */
     public File getCurrentDirectory() {
-        return new File(currDirFile.getAbsolutePath());
+        String normalizedCurrDir = URI.create(currDirFile.getAbsolutePath())
+                .normalize()
+                .toString();
+
+        if (normalizedCurrDir.endsWith(File.separator)) {
+            normalizedCurrDir = normalizedCurrDir.substring(0, normalizedCurrDir.length()-1);
+        }
+
+        return new File(normalizedCurrDir);
     }
 
     /**
@@ -124,6 +133,7 @@ public class CodeCraftersShellEnvironment {
                 argsList.add(cmdPath.getFileName().toString());
                 argsList.addAll(Arrays.asList(args));
 
+                // create process at current working directory
                 ProcessBuilder processBuilder = new ProcessBuilder(argsList).directory(currDirFile);
                 Process process = processBuilder.start();
                 process.getInputStream().transferTo(os);

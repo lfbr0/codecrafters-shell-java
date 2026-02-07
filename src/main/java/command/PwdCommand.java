@@ -17,16 +17,6 @@ public class PwdCommand implements CodeCraftersShellCommand {
 
     @Override
     public void execute(OutputStream outputStream, OutputStream errorStream, String... args) throws Exception {
-        String pwd = URI.create(shellEnvironment.getCurrentDirectory()
-                .getAbsolutePath())
-                .normalize()
-                .toString();
-
-        // trim trailing "/"
-        if (pwd.endsWith(File.separator)) {
-            pwd = pwd.substring(0, pwd.length()-1);
-        }
-
-        new PrintStream(outputStream).println(pwd);
+        new PrintStream(outputStream).println(shellEnvironment.getCurrentDirectory());
     }
 }
