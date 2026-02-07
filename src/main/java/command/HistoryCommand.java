@@ -2,6 +2,7 @@ package command;
 
 import environment.CodeCraftersShellEnvironment;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -15,6 +16,11 @@ public class HistoryCommand implements CodeCraftersShellCommand {
 
     public HistoryCommand(CodeCraftersShellEnvironment shellEnvironment) {
         this.shellEnvironment = shellEnvironment;
+
+        // if history file var, then read it
+        shellEnvironment.getHistoryFilePath().ifPresent(historyFile -> {
+            readHistoryFromFile(historyFile);
+        });
     }
 
     @Override
@@ -25,37 +31,13 @@ public class HistoryCommand implements CodeCraftersShellCommand {
 
         // -r flag implies reading from line in args[1] & not doing anything else
         if (args != null && args.length >= 2 && args[0].equals("-r")) {
-            Files
-                    .readAllLines(Path.of(args[1]))
-                    .forEach(line -> {
-                        line = line.trim();
-                        if (!line.isBlank()) shellEnvironment.addToHistory(line);
-                    });
-            shellEnvironment.setHistoryAppendIndex(shellEnvironment.getHistoryCopy().size());
+            readHistoryFromFile(args[1]);
             return;
         }
 
         // -w (-a does same but append) flag implies writing from history to file path in args[1] & not doing anything else
         if (args != null && args.length >= 2 && (args[0].equals("-w") || args[0].equals("-a"))) {
-            int appendStart = Math.min(shellEnvironment.getHistoryAppendIndex(), history.size());
-
-            if (args[0].equals("-a")) { // append mode
-                List<String> toAppend = history.subList(appendStart, history.size());
-                Files.write(
-                        Path.of(args[1]),
-                        toAppend,
-                        StandardOpenOption.CREATE,
-                        StandardOpenOption.APPEND
-                );
-            } else { // it's write mode
-                Files.write(
-                        Path.of(args[1]),
-                        history,
-                        StandardOpenOption.CREATE,
-                        StandardOpenOption.TRUNCATE_EXISTING
-                );
-            }
-            shellEnvironment.setHistoryAppendIndex(history.size());
+            writeHistoryToFile(args[0].equals("-a"), history, args[1]);
             return;
         }
 
@@ -69,5 +51,38 @@ public class HistoryCommand implements CodeCraftersShellCommand {
         for (int i = start; i < history.size(); i++) {
             printStream.printf("\t%d %s\n", i + 1, history.get(i));
         }
+    }
+
+    private void writeHistoryToFile(boolean appendMode, List<String> history, String historyFilePath) throws IOException {
+        int appendStart = Math.min(shellEnvironment.getHistoryAppendIndex(), history.size());
+
+        if (appendMode) { // append mode
+            List<String> toAppend = history.subList(appendStart, history.size());
+            Files.write(
+                    Path.of(historyFilePath),
+                    toAppend,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND
+            );
+        } else { // it's write mode
+            Files.write(
+                    Path.of(historyFilePath),
+                    history,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING
+            );
+        }
+        shellEnvironment.setHistoryAppendIndex(history.size());
+    }
+
+    private void readHistoryFromFile(String historyFilePath) throws IOException {
+        Files
+                .readAllLines(Path.of(historyFilePath))
+                .forEach(line -> {
+                    line = line.trim();
+                    if (!line.isBlank()) shellEnvironment.addToHistory(line);
+                });
+        shellEnvironment.setHistoryAppendIndex(shellEnvironment.getHistoryCopy().size());
+        return;
     }
 }

@@ -170,11 +170,27 @@ public class CodeCraftersShellEnvironment {
         history.add(command);
     }
 
+    /**
+     * Get index of next history line to append to
+     * @return index to append to
+     */
     public int getHistoryAppendIndex() {
         return historyAppendIndex;
     }
 
+    /**
+     * Set index of next history line to append to
+     * @param historyAppendIndex index to set
+     */
     public void setHistoryAppendIndex(int historyAppendIndex) {
         this.historyAppendIndex = historyAppendIndex;
+    }
+
+    /**
+     * Get path to history file by environment variable HISTFILE
+     * @return optional path to history file
+     */
+    public Optional<String> getHistoryFilePath() {
+        return Optional.ofNullable(System.getenv("HISTFILE"));
     }
 }
