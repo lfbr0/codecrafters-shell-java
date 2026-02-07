@@ -21,20 +21,17 @@ public class HistoryCommand implements CodeCraftersShellCommand {
 
     @Override
     public void execute(OutputStream outputStream, OutputStream errorStream, String... args) throws Exception {
-        List<String> history = shellEnvironment.getHistory();
-
-        Stream<String> historyStream = IntStream
-                .range(0, history.size()) // enumerate from 0 .. history.length
-                .mapToObj(i -> String.format("\t%d %s\n", i+1, history.get(i)));
-
-        // if there is arguments, and first is number of history lines
+        // if there are arguments, and first is number of history lines
+        int start = 0;
         if (args != null && args.length >= 1 && args[0].matches("[0-9]+")) {
-            int toSkip = Integer.parseInt(args[0]);
-            historyStream = historyStream.skip(toSkip);
+            start = Integer.parseInt(args[0]);
         }
 
-        // for each, print them
+        List<String> history = shellEnvironment.getHistory();
         PrintStream printStream = new PrintStream(outputStream);
-        historyStream.forEach(printStream::print);
+
+        for (int i = start; i < history.size(); i++) {
+            printStream.printf("\t%d %s\n", i+1, history.get(i));
+        }
     }
 }
