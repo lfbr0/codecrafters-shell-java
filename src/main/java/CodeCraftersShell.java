@@ -23,6 +23,9 @@ public class CodeCraftersShell implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
+        inputStream.close();
+        outputStream.close();
+        errorStream.close();
     }
 
     // perform REPL cycle in shell
@@ -30,7 +33,7 @@ public class CodeCraftersShell implements AutoCloseable {
         try (Scanner scanner = new Scanner(inputStream)) {
             // while should not close
             while (!shouldClose) {
-                System.out.print("$ ");
+                new PrintStream(outputStream).print("$ ");
                 interpret(scanner.nextLine().trim());
             }
         }
