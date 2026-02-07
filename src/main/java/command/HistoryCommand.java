@@ -36,8 +36,11 @@ public class HistoryCommand implements CodeCraftersShellCommand {
 
         // -w (-a does same but append) flag implies writing from history to file path in args[1] & not doing anything else
         if (args != null && args.length >= 2 && (args[0].equals("-w") || args[0].equals("-a"))) {
-            StandardOpenOption mode = args[0].equals("-a") ? StandardOpenOption.APPEND : StandardOpenOption.WRITE;
-            Files.write(Path.of(args[1]), history, mode);
+            if (args[0].equals("-a")) {
+                Files.write(Path.of(args[1]), history, StandardOpenOption.APPEND);
+            } else { //it's write
+                Files.write(Path.of(args[1]), history);
+            }
             return;
         }
 
