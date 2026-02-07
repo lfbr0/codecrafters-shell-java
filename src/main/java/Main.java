@@ -1,6 +1,8 @@
 import command.*;
 import environment.CodeCraftersShellEnvironment;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import static environment.CodeCraftersShellEnvironment.getEnvironment;
@@ -33,7 +35,8 @@ public class Main {
 
         // if history file exists, then write history to it on closing
         if (histFileOptional.isPresent()) {
-            historyCommand.writeHistoryToFile(false, shellEnvironment.getHistoryCopy(), histFileOptional.get());
+            boolean appendIfExists = Files.exists(Path.of(histFileOptional.get()));
+            historyCommand.writeHistoryToFile(appendIfExists, shellEnvironment.getHistoryCopy(), histFileOptional.get());
         }
     }
 }
