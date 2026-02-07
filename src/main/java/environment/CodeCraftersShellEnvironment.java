@@ -169,6 +169,7 @@ public class CodeCraftersShellEnvironment {
      * @return list of commands
      */
     public List<String> getPathCommands() {
+        refreshCommandsInPath();
         return new ArrayList<>(COMMANDS_IN_PATH.keySet());
     }
 
