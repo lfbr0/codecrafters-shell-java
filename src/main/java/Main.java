@@ -1,6 +1,8 @@
 import command.*;
 import environment.CodeCraftersShellEnvironment;
 
+import java.util.Optional;
+
 import static environment.CodeCraftersShellEnvironment.getEnvironment;
 
 public class Main {
@@ -12,10 +14,26 @@ public class Main {
         shellEnvironment.registerBuiltinCommand("type", new TypeCommand(shellEnvironment));
         shellEnvironment.registerBuiltinCommand("pwd", new PwdCommand(shellEnvironment));
         shellEnvironment.registerBuiltinCommand("cd", new CdCommand(shellEnvironment));
-        shellEnvironment.registerBuiltinCommand("history", new HistoryCommand(shellEnvironment));
+
+        // if history env variable is set, then read into memory history file & then register it
+        HistoryCommand historyCommand = new HistoryCommand(shellEnvironment);
+        Optional<String> histFileOptional = Optional.ofNullable(System.getenv("HISTFILE"));
+        if (histFileOptional.isPresent()) {
+            try {
+                historyCommand.readHistoryFromFile(histFileOptional.get());
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+            }
+        }
+        shellEnvironment.registerBuiltinCommand("history", historyCommand);
 
         try (CodeCraftersShell shell = new CodeCraftersShell(getEnvironment())) {
             shell.repl();
+        }
+
+        // if history file exists, then write history to it on closing
+        if (histFileOptional.isPresent()) {
+            historyCommand.writeHistoryToFile(false, shellEnvironment.getHistoryCopy(), histFileOptional.get());
         }
     }
 }

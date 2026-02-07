@@ -186,11 +186,4 @@ public class CodeCraftersShellEnvironment {
         this.historyAppendIndex = historyAppendIndex;
     }
 
-    /**
-     * Get path to history file by environment variable HISTFILE
-     * @return optional path to history file
-     */
-    public Optional<String> getHistoryFilePath() {
-        return Optional.ofNullable(System.getenv("HISTFILE"));
-    }
 }

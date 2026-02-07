@@ -16,15 +16,6 @@ public class HistoryCommand implements CodeCraftersShellCommand {
 
     public HistoryCommand(CodeCraftersShellEnvironment shellEnvironment) {
         this.shellEnvironment = shellEnvironment;
-
-        // if history file var, then read it
-        shellEnvironment.getHistoryFilePath().ifPresent(historyFile -> {
-            try {
-                readHistoryFromFile(historyFile);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
     }
 
     @Override
@@ -57,7 +48,7 @@ public class HistoryCommand implements CodeCraftersShellCommand {
         }
     }
 
-    private void writeHistoryToFile(boolean appendMode, List<String> history, String historyFilePath) throws IOException {
+    public void writeHistoryToFile(boolean appendMode, List<String> history, String historyFilePath) throws IOException {
         int appendStart = Math.min(shellEnvironment.getHistoryAppendIndex(), history.size());
 
         if (appendMode) { // append mode
@@ -79,7 +70,7 @@ public class HistoryCommand implements CodeCraftersShellCommand {
         shellEnvironment.setHistoryAppendIndex(history.size());
     }
 
-    private void readHistoryFromFile(String historyFilePath) throws IOException {
+    public void readHistoryFromFile(String historyFilePath) throws IOException {
         Files
                 .readAllLines(Path.of(historyFilePath))
                 .forEach(line -> {
