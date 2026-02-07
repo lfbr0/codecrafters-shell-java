@@ -156,7 +156,7 @@ public class CodeCraftersShellEnvironment {
      * Retrieves command history (last is last executed)
      * @return list of commands
      */
-    public List<String> getHistory() {
+    public List<String> getHistoryCopy() {
         return new ArrayList<>(history);
     }
 

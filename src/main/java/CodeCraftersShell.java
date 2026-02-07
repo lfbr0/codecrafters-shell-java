@@ -47,7 +47,7 @@ public class CodeCraftersShell implements AutoCloseable {
                     .build();
 
             // add history to reader
-            shellEnvironment.getHistory().forEach(cmd -> reader.getHistory().add(cmd));
+            shellEnvironment.getHistoryCopy().forEach(cmd -> reader.getHistory().add(cmd));
 
             while (!shouldClose) {
                 String line = reader.readLine("$ ");

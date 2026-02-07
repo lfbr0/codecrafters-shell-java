@@ -19,7 +19,7 @@ public class HistoryCommand implements CodeCraftersShellCommand {
     @Override
     public void execute(OutputStream outputStream, OutputStream errorStream, String... args) throws Exception {
         // if there are arguments, and first is the number of history lines
-        List<String> history = shellEnvironment.getHistory();
+        List<String> history = shellEnvironment.getHistoryCopy();
         PrintStream printStream = new PrintStream(outputStream);
 
         // -r flag implies reading from line in args[1] & not doing anything else
@@ -30,6 +30,13 @@ public class HistoryCommand implements CodeCraftersShellCommand {
                         line = line.trim();
                         if (!line.isBlank()) shellEnvironment.addToHistory(line);
                     });
+            return;
+        }
+
+        // -w flag implies writing from history to file path in args[1] & not doing anything else
+        if (args != null && args.length >= 2 && args[0].equals("-w")) {
+            history.add(""); // empty line as per specs
+            Files.write(Path.of(args[1]), history);
             return;
         }
 
