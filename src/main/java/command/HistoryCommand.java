@@ -29,8 +29,8 @@ public class HistoryCommand implements CodeCraftersShellCommand {
 
         // if there is arguments, and first is number of history lines
         if (args != null && args.length >= 1 && args[0].matches("[0-9]+")) {
-            int limit = Integer.parseInt(args[0]);
-            historyStream = historyStream.limit(limit);
+            int toSkip = Integer.parseInt(args[0]);
+            historyStream = historyStream.skip(toSkip);
         }
 
         // for each, print them
