@@ -1,6 +1,7 @@
 import command.*;
 import completion.CodeCraftersShellCompleter;
 import environment.CodeCraftersShellEnvironment;
+import shell.CodeCraftersShell;
 
 import java.nio.file.Files;
 import java.nio.file.Path;

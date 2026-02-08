@@ -1,3 +1,5 @@
+package shell;
+
 import completion.CodeCraftersShellCompleter;
 import environment.CodeCraftersShellEnvironment;
 import org.jline.reader.LineReader;
@@ -11,10 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CodeCraftersShell implements AutoCloseable {
 
@@ -89,8 +88,10 @@ public class CodeCraftersShell implements AutoCloseable {
      */
     private void interpret(String line) {
         // get command and args
-        String command = line.split(" ")[0].trim();
-        String[] args = parseArguments(line.substring(command.length()).trim());
+        String commandArgsLine = line.trim();
+        CommandParseResult parsedCommandAndArgs = CommandParseResult.parse(commandArgsLine);
+        String command = parsedCommandAndArgs.getCommand();
+        String[] args = parsedCommandAndArgs.getArgs();
 
         // if exit condition, then exit shell
         if (command.equals("exit")) {
@@ -124,93 +125,5 @@ public class CodeCraftersShell implements AutoCloseable {
             e.printStackTrace(new PrintStream(errorStream));
             shouldClose = true;
         }
-    }
-
-    /**
-     * From the input line of the user, parse out the arguments
-     * @param argsLine raw input line of user
-     * @return array of arguments
-     */
-    private String[] parseArguments(String argsLine) {
-        List<String> argsArray = new LinkedList<>();
-        StringBuilder currentArg = new StringBuilder();
-
-        boolean inSingleQuotes = false;
-        boolean inDoubleQuotes = false;
-
-        for (int i = 0; i < argsLine.length(); i++) {
-            char c = argsLine.charAt(i);
-
-            // Backslash handling depends on context
-            if (c == '\\') {
-                if (inSingleQuotes) {
-                    // Single quotes: backslash is always literal
-                    currentArg.append('\\');
-                    continue;
-                }
-
-                if (inDoubleQuotes) {
-                    // Double quotes: backslash escapes only " and \ (in this stage)
-                    if (i + 1 < argsLine.length()) {
-                        char next = argsLine.charAt(i + 1);
-                        if (next == '"' || next == '\\') {
-                            currentArg.append(next); // escaped char
-                            i++; // consume next
-                        } else {
-                            // backslash is literal for all other chars
-                            currentArg.append('\\');
-                        }
-                    } else {
-                        // trailing backslash -> keep literal
-                        currentArg.append('\\');
-                    }
-                    continue;
-                }
-
-                // Outside quotes: backslash escapes ANY next character
-                if (i + 1 < argsLine.length()) {
-                    currentArg.append(argsLine.charAt(i + 1));
-                    i++; // consume next
-                } else {
-                    currentArg.append('\\');
-                }
-                continue;
-            }
-
-            // Quote toggles (quote chars not included)
-            if (c == '\'' && !inDoubleQuotes) {
-                inSingleQuotes = !inSingleQuotes;
-                continue;
-            }
-
-            if (c == '"' && !inSingleQuotes) {
-                inDoubleQuotes = !inDoubleQuotes;
-                continue;
-            }
-
-            // Whitespace splits args only when not in quotes
-            if (Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes) {
-                String currentArgStr = currentArg.toString().trim();
-                if (!currentArgStr.isEmpty()) {
-                    argsArray.add(currentArgStr);
-                }
-                currentArg.setLength(0);
-
-                // collapse consecutive whitespace like a shell
-                while (i + 1 < argsLine.length() && Character.isWhitespace(argsLine.charAt(i + 1))) {
-                    i++;
-                }
-                continue;
-            }
-
-            currentArg.append(c);
-        }
-
-        String last = currentArg.toString().trim();
-        if (!last.isEmpty()) {
-            argsArray.add(last);
-        }
-
-        return argsArray.toArray(new String[0]);
     }
 }
