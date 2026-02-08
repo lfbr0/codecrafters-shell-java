@@ -1,6 +1,7 @@
 package environment;
 
 import command.CodeCraftersShellCommand;
+import command.PathCommand;
 
 import java.io.File;
 import java.net.URI;
@@ -149,20 +150,8 @@ public class CodeCraftersShellEnvironment {
      * @return command executor
      */
     public Optional<CodeCraftersShellCommand> getCommand(String command) {
-        return commandPath(command).map(cmdPath -> {
-           return (os, es, args) -> {
-                // form args
-                List<String> argsList = new ArrayList<>(args.length + 1);
-                argsList.add(cmdPath.getFileName().toString());
-                argsList.addAll(Arrays.asList(args));
-
-                // create process at current working directory
-                ProcessBuilder processBuilder = new ProcessBuilder(argsList).directory(currDirFile);
-                Process process = processBuilder.start();
-                process.getInputStream().transferTo(os);
-                process.getErrorStream().transferTo(es);
-           };
-        });
+        return commandPath(command)
+                .map(cmdPath -> new PathCommand(cmdPath, currDirFile));
     }
 
     /**
