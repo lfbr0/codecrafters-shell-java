@@ -8,10 +8,7 @@ import org.jline.reader.impl.DefaultParser;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -99,13 +96,34 @@ public class CodeCraftersShell implements AutoCloseable {
             return;
         }
 
+        // determine streams to use - by default, stdout & stderr
+        OutputStream outputStreamToUse = outputStream;
+        OutputStream errorStreamToUse = errorStream;
+
         try {
+            // check if redirection argument of stdout
+            int redirectionIndex = -1;
+            if (
+                    (redirectionIndex = parsedCommandAndArgs.argumentIndex(">")) != -1  ||
+                    (redirectionIndex = parsedCommandAndArgs.argumentIndex("1>")) != -1
+            ) {
+                String filePath = args[redirectionIndex + 1];
+                outputStreamToUse = new FileOutputStream(filePath);
+            }
+
+            // remove from args array if redirection
+            if (redirectionIndex != -1) {
+                args = new ArrayList<>(List.of(args))
+                        .subList(0, redirectionIndex)
+                        .toArray(String[]::new);
+            }
+
             // if builtin command, then execute it (get from shell env)
             if (shellEnvironment.hasBuiltinCommand(command)) {
                 shellEnvironment
                         .getBuiltinCommand(command)
                         .get()
-                        .execute(outputStream, errorStream, args);
+                        .execute(outputStreamToUse, errorStreamToUse, args);
                 return;
             }
 
@@ -114,15 +132,15 @@ public class CodeCraftersShell implements AutoCloseable {
                 shellEnvironment
                         .getCommand(command)
                         .get()
-                        .execute(outputStream, errorStream, args);
+                        .execute(outputStreamToUse, errorStreamToUse, args);
                 return;
             }
 
             // no command has been found!
-            new PrintStream(outputStream).println(command + ": command not found");
+            new PrintStream(outputStreamToUse).println(command + ": command not found");
         } catch (Exception e) {
             // print stack trace and exit
-            e.printStackTrace(new PrintStream(errorStream));
+            e.printStackTrace(new PrintStream(errorStreamToUse));
             shouldClose = true;
         }
     }

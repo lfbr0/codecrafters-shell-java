@@ -1,6 +1,7 @@
 package shell;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -184,4 +185,19 @@ public final class CommandParseResult {
     public String getCommand() { return command; }
     public String[] getArgs() { return args.clone(); }
     public int getConsumed() { return consumed; }
+
+    /**
+     * Returns index of where argument can be found in array
+     * @param arg argument to find
+     * @return index of argument, or -1 if not found
+     */
+    public int argumentIndex(String arg) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals(arg)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 }
