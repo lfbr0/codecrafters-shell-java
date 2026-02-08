@@ -141,51 +141,50 @@ public class CodeCraftersShell implements AutoCloseable {
         for (int i = 0; i < argsLine.length(); i++) {
             char c = argsLine.charAt(i);
 
-            // Backslash escaping (ONLY outside quotes)
+            // Backslash escaping ONLY outside quotes.
+            // Inside single quotes, backslash is literal (no escaping).
             if (c == '\\' && !inSingleQuotes && !inDoubleQuotes) {
                 if (i + 1 < argsLine.length()) {
-                    // Escape next char: add it literally, drop the backslash
                     currentArg.append(argsLine.charAt(i + 1));
-                    i++; // skip next char (already consumed)
+                    i++; // consume escaped char
                 } else {
-                    // Trailing '\' with nothing to escape: keep it literal (reasonable fallback)
+                    // trailing backslash -> keep literal
                     currentArg.append('\\');
                 }
                 continue;
             }
 
-            // Quote toggles (only if not inside the other quote type)
+            // Single quotes toggle when not in double quotes; quote char itself is not included.
             if (c == '\'' && !inDoubleQuotes) {
                 inSingleQuotes = !inSingleQuotes;
-                continue; // do not include quote char
+                continue;
             }
 
+            // Double quotes toggle when not in single quotes; quote char itself is not included.
             if (c == '"' && !inSingleQuotes) {
                 inDoubleQuotes = !inDoubleQuotes;
-                continue; // do not include quote char
+                continue;
             }
 
-            // Argument separator (whitespace outside quotes)
+            // Whitespace splits args only when not in quotes
             if (Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes) {
                 String currentArgStr = currentArg.toString().trim();
-
                 if (!currentArgStr.isEmpty()) {
                     argsArray.add(currentArgStr);
                 }
                 currentArg.setLength(0);
 
-                // consume consecutive whitespace (shell-like collapsing)
-                while (i + 1 < argsLine.length()
-                        && Character.isWhitespace(argsLine.charAt(i + 1))) {
+                // collapse consecutive whitespace like a shell
+                while (i + 1 < argsLine.length() && Character.isWhitespace(argsLine.charAt(i + 1))) {
                     i++;
                 }
                 continue;
             }
 
+            // Normal char (including backslashes inside single quotes)
             currentArg.append(c);
         }
 
-        // Commit last arg
         String last = currentArg.toString().trim();
         if (!last.isEmpty()) {
             argsArray.add(last);
@@ -193,4 +192,5 @@ public class CodeCraftersShell implements AutoCloseable {
 
         return argsArray.toArray(new String[0]);
     }
+
 }
