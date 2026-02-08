@@ -101,14 +101,21 @@ public class CodeCraftersShell implements AutoCloseable {
         OutputStream errorStreamToUse = errorStream;
 
         try {
-            // check if redirection argument of stdout
             int redirectionIndex = -1;
+            // check if redirection argument of stdout
             if (
                     (redirectionIndex = parsedCommandAndArgs.argumentIndex(">")) != -1  ||
                     (redirectionIndex = parsedCommandAndArgs.argumentIndex("1>")) != -1
             ) {
                 String filePath = args[redirectionIndex + 1];
                 outputStreamToUse = new FileOutputStream(filePath);
+            }
+            // check if redirection argument of stderr
+            if (
+                    (redirectionIndex = parsedCommandAndArgs.argumentIndex("2>")) != -1
+            ) {
+                String filePath = args[redirectionIndex + 1];
+                errorStreamToUse = new FileOutputStream(filePath);
             }
 
             // remove from args array if redirection
