@@ -133,61 +133,62 @@ public class CodeCraftersShell implements AutoCloseable {
      */
     private String[] parseArguments(String argsLine) {
         List<String> argsArray = new LinkedList<>();
-        String currentArg = "";
+        StringBuilder currentArg = new StringBuilder();
 
         boolean inSingleQuotes = false;
         boolean inDoubleQuotes = false;
 
         for (int i = 0; i < argsLine.length(); i++) {
             char c = argsLine.charAt(i);
-            boolean commitArg = false;
 
+            // Backslash escaping (ONLY outside quotes)
+            if (c == '\\' && !inSingleQuotes && !inDoubleQuotes) {
+                if (i + 1 < argsLine.length()) {
+                    // Escape next char: add it literally, drop the backslash
+                    currentArg.append(argsLine.charAt(i + 1));
+                    i++; // skip next char (already consumed)
+                } else {
+                    // Trailing '\' with nothing to escape: keep it literal (reasonable fallback)
+                    currentArg.append('\\');
+                }
+                continue;
+            }
+
+            // Quote toggles (only if not inside the other quote type)
             if (c == '\'' && !inDoubleQuotes) {
                 inSingleQuotes = !inSingleQuotes;
-                continue;
+                continue; // do not include quote char
             }
 
             if (c == '"' && !inSingleQuotes) {
                 inDoubleQuotes = !inDoubleQuotes;
-                continue;
+                continue; // do not include quote char
             }
 
+            // Argument separator (whitespace outside quotes)
             if (Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes) {
-                commitArg = true;
-            }
-
-            // I understand this is not performant since strings are immutable, but I don't give a fuck.
-            currentArg += c;
-
-            // if we should commit this, or we're at the end of the line, add it to args
-            if (commitArg) {
-                // do not append if empty
-                String currentArgStr = currentArg.trim();
-
-                // remove quotes from arg
-                if ( (currentArgStr.startsWith("\"") && currentArgStr.endsWith("\"")) ||
-                        (currentArgStr.startsWith("'") && currentArgStr.endsWith("'")) ) {
-                    currentArgStr = currentArgStr.substring(1, currentArgStr.length() - 1);
-                }
+                String currentArgStr = currentArg.toString().trim();
 
                 if (!currentArgStr.isEmpty()) {
                     argsArray.add(currentArgStr);
                 }
-                currentArg = "";
+                currentArg.setLength(0);
+
+                // consume consecutive whitespace (shell-like collapsing)
+                while (i + 1 < argsLine.length()
+                        && Character.isWhitespace(argsLine.charAt(i + 1))) {
+                    i++;
+                }
+                continue;
             }
+
+            currentArg.append(c);
         }
 
-        if (!currentArg.isEmpty()) {
-            String currentArgStr = currentArg.trim();
-
-            if ( (currentArgStr.startsWith("\"") && currentArgStr.endsWith("\"")) ||
-                    (currentArgStr.startsWith("'") && currentArgStr.endsWith("'")) ) {
-                currentArgStr = currentArgStr.substring(1, currentArgStr.length() - 1);
-            }
-
-            if (!currentArgStr.isEmpty()) {
-                argsArray.add(currentArgStr);
-            }
+        // Commit last arg
+        String last = currentArg.toString().trim();
+        if (!last.isEmpty()) {
+            argsArray.add(last);
         }
 
         return argsArray.toArray(new String[0]);
