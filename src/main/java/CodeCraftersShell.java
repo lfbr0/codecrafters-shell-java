@@ -141,26 +141,48 @@ public class CodeCraftersShell implements AutoCloseable {
         for (int i = 0; i < argsLine.length(); i++) {
             char c = argsLine.charAt(i);
 
-            // Backslash escaping ONLY outside quotes.
-            // Inside single quotes, backslash is literal (no escaping).
-            if (c == '\\' && !inSingleQuotes && !inDoubleQuotes) {
+            // Backslash handling depends on context
+            if (c == '\\') {
+                if (inSingleQuotes) {
+                    // Single quotes: backslash is always literal
+                    currentArg.append('\\');
+                    continue;
+                }
+
+                if (inDoubleQuotes) {
+                    // Double quotes: backslash escapes only " and \ (in this stage)
+                    if (i + 1 < argsLine.length()) {
+                        char next = argsLine.charAt(i + 1);
+                        if (next == '"' || next == '\\') {
+                            currentArg.append(next); // escaped char
+                            i++; // consume next
+                        } else {
+                            // backslash is literal for all other chars
+                            currentArg.append('\\');
+                        }
+                    } else {
+                        // trailing backslash -> keep literal
+                        currentArg.append('\\');
+                    }
+                    continue;
+                }
+
+                // Outside quotes: backslash escapes ANY next character
                 if (i + 1 < argsLine.length()) {
                     currentArg.append(argsLine.charAt(i + 1));
-                    i++; // consume escaped char
+                    i++; // consume next
                 } else {
-                    // trailing backslash -> keep literal
                     currentArg.append('\\');
                 }
                 continue;
             }
 
-            // Single quotes toggle when not in double quotes; quote char itself is not included.
+            // Quote toggles (quote chars not included)
             if (c == '\'' && !inDoubleQuotes) {
                 inSingleQuotes = !inSingleQuotes;
                 continue;
             }
 
-            // Double quotes toggle when not in single quotes; quote char itself is not included.
             if (c == '"' && !inSingleQuotes) {
                 inDoubleQuotes = !inDoubleQuotes;
                 continue;
@@ -181,7 +203,6 @@ public class CodeCraftersShell implements AutoCloseable {
                 continue;
             }
 
-            // Normal char (including backslashes inside single quotes)
             currentArg.append(c);
         }
 
@@ -192,5 +213,4 @@ public class CodeCraftersShell implements AutoCloseable {
 
         return argsArray.toArray(new String[0]);
     }
-
 }
