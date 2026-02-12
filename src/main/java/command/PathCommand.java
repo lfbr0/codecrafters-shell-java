@@ -1,6 +1,7 @@
 package command;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,7 +27,25 @@ public class PathCommand implements CodeCraftersShellCommand {
         // create process at current working directory
         ProcessBuilder processBuilder = new ProcessBuilder(argsList).directory(currentWorkDirectoryFile);
         Process process = processBuilder.start();
-        process.getInputStream().transferTo(outputStream);
-        process.getErrorStream().transferTo(errorStream);
+
+        // transfer concurrently - no transferTo so is not blocking...
+        Thread stdOutThread = new Thread(() -> {
+           try (InputStream in = process.getInputStream()) {
+               in.transferTo(outputStream);
+           } catch (Exception ignored) {}
+        }, "cmd-stdout-transfer");
+
+        Thread stdErrThread = new Thread(() -> {
+            try (InputStream in = process.getErrorStream()) {
+                in.transferTo(errorStream);
+            } catch (Exception ignored) {}
+        }, "cmd-stderr-transfer");
+
+        stdOutThread.start();
+        stdErrThread.start();
+        // join threads after process is finished
+        process.waitFor();
+        stdOutThread.join();
+        stdErrThread.join();
     }
 }

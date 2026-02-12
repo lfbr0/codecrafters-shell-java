@@ -200,4 +200,12 @@ public final class CommandParseResult {
         return -1;
     }
 
+    /**
+     * Returns immutable copy of this result
+     * @return copy of this result
+     */
+    public CommandParseResult copy() {
+        return new CommandParseResult(command, consumed, args.clone());
+    }
+
 }

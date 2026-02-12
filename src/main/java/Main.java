@@ -31,10 +31,9 @@ public class Main {
         }
         shellEnvironment.registerBuiltinCommand("history", historyCommand);
 
+        // start repl here!
         CodeCraftersShellEnvironment env = getEnvironment();
-        try (CodeCraftersShell shell = new CodeCraftersShell(env, new CodeCraftersShellCompleter(env))) {
-            shell.repl();
-        }
+        new CodeCraftersShell(env, new CodeCraftersShellCompleter(env)).repl();
 
         // if history file exists, then write history to it on closing
         if (histFileOptional.isPresent()) {

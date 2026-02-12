@@ -12,13 +12,10 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CodeCraftersShell implements AutoCloseable {
+public class CodeCraftersShell {
 
     private final CodeCraftersShellEnvironment shellEnvironment;
     private final CodeCraftersShellCompleter shellCompleter;
-    private InputStream inputStream = System.in;
-    private OutputStream outputStream = System.out;
-    private OutputStream errorStream  = System.err;
 
     // shell state vars
     private boolean shouldClose = false;
@@ -29,13 +26,6 @@ public class CodeCraftersShell implements AutoCloseable {
         this.shellCompleter = shellCompleter;
     }
 
-    @Override
-    public void close() throws Exception {
-        inputStream.close();
-        outputStream.close();
-        errorStream.close();
-    }
-
     /**
      * Starts the shell REPL
      * @throws IOException
@@ -43,6 +33,11 @@ public class CodeCraftersShell implements AutoCloseable {
     public void repl() throws IOException {
         DefaultParser parser = new DefaultParser();
         parser.setEscapeChars(new char[0]);
+
+        // default streams
+        InputStream inputStream = System.in;
+        OutputStream outputStream = System.out;
+        OutputStream errorStream  = System.err;
 
         try (Terminal terminal = TerminalBuilder.builder()
                 .streams(inputStream, outputStream)
@@ -60,7 +55,9 @@ public class CodeCraftersShell implements AutoCloseable {
                     .build();
 
             // add history to reader
-            shellEnvironment.getHistoryCopy().forEach(cmd -> reader.getHistory().add(cmd));
+            shellEnvironment
+                    .getHistoryCopy()
+                    .forEach(cmd -> reader.getHistory().add(cmd));
 
             while (!shouldClose) {
                 String line = reader.readLine("$ ");
@@ -73,7 +70,7 @@ public class CodeCraftersShell implements AutoCloseable {
                     shellEnvironment.addToHistory(line);
                 }
 
-                interpret(line);
+                interpret(line, inputStream, outputStream, errorStream);
                 terminal.flush();
             }
         }
@@ -81,9 +78,16 @@ public class CodeCraftersShell implements AutoCloseable {
 
     /**
      * Interpret a line of input from the user and execute it
-     * @param line line of input from user
+     *
+     * @param line - line of input from user
+     * @param inputStream - input stream to use
+     * @param outputStream - output stream to use
+     * @param errorStream - error stream to use
      */
-    private void interpret(String line) {
+    public void interpret(String line,
+                           InputStream inputStream,
+                           OutputStream outputStream,
+                           OutputStream errorStream) {
         // get command and args
         String commandArgsLine = line.trim();
         CommandParseResult parsedCommandAndArgs = CommandParseResult.parse(commandArgsLine);
@@ -101,6 +105,13 @@ public class CodeCraftersShell implements AutoCloseable {
         OutputStream errorStreamToUse = errorStream;
 
         try {
+            // check if piped command - run executor for it if so
+            if (parsedCommandAndArgs.argumentIndex("|") != -1) {
+                new CodeCraftersPipelineExecutor(this, shellEnvironment, parsedCommandAndArgs.copy())
+                        .executePipeline();
+                return;
+            }
+
             int redirectionIndex = -1;
             // check if redirection argument of stdout
             if (
@@ -109,18 +120,25 @@ public class CodeCraftersShell implements AutoCloseable {
                     (redirectionIndex = parsedCommandAndArgs.argumentIndex(">>"))   != -1     ||
                     (redirectionIndex = parsedCommandAndArgs.argumentIndex("1>>"))  != -1
             ) {
-                String filePath = args[redirectionIndex + 1];
                 boolean append = args[redirectionIndex].equals(">>") || args[redirectionIndex].equals("1>>");
-                outputStreamToUse = new FileOutputStream(filePath, append);
+                File outFile = new File(args[redirectionIndex + 1]);
+                // if not absolute, must pass on current dir
+                if (!outFile.isAbsolute()) {
+                    outFile = new File(shellEnvironment.getCurrentDirectory(), args[redirectionIndex + 1]);
+                }
+                outputStreamToUse = new FileOutputStream(outFile, append);
             }
             // check if redirection argument of stderr
             else if (
                     (redirectionIndex = parsedCommandAndArgs.argumentIndex("2>"))   != -1     ||
                     (redirectionIndex = parsedCommandAndArgs.argumentIndex("2>>"))  != -1
             ) {
-                String filePath = args[redirectionIndex + 1];
                 boolean append = args[redirectionIndex].equals("2>>");
-                errorStreamToUse = new FileOutputStream(filePath, append);
+                File outFile = new File(args[redirectionIndex + 1]);
+                if (!outFile.isAbsolute()) {
+                    outFile = new File(shellEnvironment.getCurrentDirectory(), args[redirectionIndex + 1]);
+                }
+                errorStreamToUse = new FileOutputStream(outFile, append);
             }
 
             // remove from args array if redirection
