@@ -163,6 +163,27 @@ public class CodeCraftersShellEnvironment {
     }
 
     /**
+     * Resolves the command by checking both built-in commands and commands available
+     * in the system's PATH. If the command is found, the corresponding command handler
+     * is returned.
+     *
+     * @param commandName the name of the command to resolve
+     * @return an {@code Optional} containing the {@code CodeCraftersShellCommand} if the command exists,
+     *         or an empty {@code Optional} if the command cannot be found
+     */
+    public Optional<CodeCraftersShellCommand> resolveCommand(String commandName) {
+        if (hasBuiltinCommand(commandName)) {
+            return getBuiltinCommand(commandName);
+        }
+
+        if (hasCommand(commandName)) {
+            return getCommand(commandName);
+        }
+
+        return Optional.empty();
+    }
+
+    /**
      * Retrieves command history (last is last executed)
      * @return list of commands
      */

@@ -3,6 +3,7 @@ package command;
 import environment.CodeCraftersShellEnvironment;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
@@ -19,7 +20,7 @@ public class HistoryCommand implements CodeCraftersShellCommand {
     }
 
     @Override
-    public void execute(OutputStream outputStream, OutputStream errorStream, String... args) throws Exception {
+    public void execute(InputStream inputStream, OutputStream outputStream, OutputStream errorStream, String... args) throws Exception {
         // if there are arguments, and first is the number of history lines
         List<String> history = shellEnvironment.getHistoryCopy();
         PrintStream printStream = new PrintStream(outputStream);

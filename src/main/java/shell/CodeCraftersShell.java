@@ -11,6 +11,9 @@ import org.jline.terminal.TerminalBuilder;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
+import command.CodeCraftersShellCommand;
 
 public class CodeCraftersShell {
 
@@ -105,13 +108,6 @@ public class CodeCraftersShell {
         OutputStream errorStreamToUse = errorStream;
 
         try {
-            // check if piped command - run executor for it if so
-            if (parsedCommandAndArgs.argumentIndex("|") != -1) {
-                new CodeCraftersPipelineExecutor(this, shellEnvironment, parsedCommandAndArgs.copy())
-                        .executePipeline();
-                return;
-            }
-
             int redirectionIndex = -1;
             // check if redirection argument of stdout
             if (
@@ -148,21 +144,20 @@ public class CodeCraftersShell {
                         .toArray(String[]::new);
             }
 
-            // if builtin command, then execute it (get from shell env)
-            if (shellEnvironment.hasBuiltinCommand(command)) {
-                shellEnvironment
-                        .getBuiltinCommand(command)
-                        .get()
-                        .execute(outputStreamToUse, errorStreamToUse, args);
+            // check if piped command - run executor for it if so
+            if (parsedCommandAndArgs.argumentIndex("|") != -1) {
+                new CodeCraftersPipelineExecutor(
+                        shellEnvironment,
+                        new CommandParseResult(command, parsedCommandAndArgs.getConsumed(), args)
+                ).executePipeline(inputStream, outputStreamToUse, errorStreamToUse);
                 return;
             }
 
-            // try to execute command from path var
-            if (shellEnvironment.hasCommand(command)) {
-                shellEnvironment
-                        .getCommand(command)
+            Optional<CodeCraftersShellCommand> commandOptional = shellEnvironment.resolveCommand(command);
+            if (commandOptional.isPresent()) {
+                commandOptional
                         .get()
-                        .execute(outputStreamToUse, errorStreamToUse, args);
+                        .execute(inputStream, outputStreamToUse, errorStreamToUse, args);
                 return;
             }
 

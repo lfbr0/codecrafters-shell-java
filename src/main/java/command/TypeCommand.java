@@ -2,6 +2,7 @@ package command;
 
 import environment.CodeCraftersShellEnvironment;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -16,7 +17,7 @@ public class TypeCommand implements CodeCraftersShellCommand {
     }
 
     @Override
-    public void execute(OutputStream outputStream, OutputStream errorStream, String... args) {
+    public void execute(InputStream inputStream, OutputStream outputStream, OutputStream errorStream, String... args) {
         PrintStream printStream = new PrintStream(outputStream);
         PrintStream printStreamError = new PrintStream(errorStream);
 

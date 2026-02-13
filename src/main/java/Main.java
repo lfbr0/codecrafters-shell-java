@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         // initialize classes in command package
         CodeCraftersShellEnvironment shellEnvironment = getEnvironment();
-        shellEnvironment.registerBuiltinCommand("exit", (_, _, _)  ->  {});
+        shellEnvironment.registerBuiltinCommand("exit", (_, _, _, _)  ->  {});
         shellEnvironment.registerBuiltinCommand("echo", new EchoCommand(shellEnvironment));
         shellEnvironment.registerBuiltinCommand("type", new TypeCommand(shellEnvironment));
         shellEnvironment.registerBuiltinCommand("pwd", new PwdCommand(shellEnvironment));

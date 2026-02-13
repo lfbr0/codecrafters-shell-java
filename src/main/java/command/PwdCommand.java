@@ -2,6 +2,7 @@ package command;
 
 import environment.CodeCraftersShellEnvironment;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -14,7 +15,7 @@ public class PwdCommand implements CodeCraftersShellCommand {
     }
 
     @Override
-    public void execute(OutputStream outputStream, OutputStream errorStream, String... args) throws Exception {
+    public void execute(InputStream inputStream, OutputStream outputStream, OutputStream errorStream, String... args) throws Exception {
         new PrintStream(outputStream).println(shellEnvironment.getCurrentDirectory());
     }
 }
